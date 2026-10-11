@@ -6,8 +6,9 @@
 #   - Cognito app client: checked by name, created only if missing
 #   - API Gateway:        checked by name, imports real logical ID if found
 #   - DynamoDB table:     imported by name, never created or deleted
-#                         (set createTable: true in config.ts for first deploy
-#                          if table doesn't exist yet)
+#                         Set createTable: true only on the first deploy of a
+#                         new table name, then set it back to false.
+#                         Name the table with id. Do not use CalendarEvents.
 #
 # Usage:
 #   cd backend && ./scripts/deploy.sh

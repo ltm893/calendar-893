@@ -22,8 +22,9 @@ Consumed by dliv-web-893.
 
 ## What this stack imports (never creates or deletes)
 - Cognito User Pool — from config.ts
-- DynamoDB CalendarEvents table — from config.ts
-  (set createTable: true on first deploy if table doesn't exist)
+- DynamoDB table named by `calendarTable` in config.ts
+  Set `createTable: true` only on the first deploy of a new table name, then set it back to `false`.
+  Do not use `CalendarEvents`. That name is the live DLIV table.
 
 ## IAM note
 Uses explicit addToRolePolicy with table + GSI ARNs.

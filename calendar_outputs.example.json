@@ -9,6 +9,6 @@
     "base_url": "https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/prod/"
   },
   "tables": {
-    "calendarEvents": "CalendarEvents"
+    "calendarEvents": "your-id-here-calendar"
   }
 }

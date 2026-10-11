@@ -20,12 +20,11 @@ export const config = {
   userPoolId: "us-east-1_XXXXXXXXX",
 
   // ── DynamoDB ──────────────────────────────────────────────────────────────
-  // Existing DynamoDB table name — imported by CDK, never created or deleted.
-  // Deploy cognito-s3-stack-893 first, then create this table manually or
-  // let calendar-893 create it on first deploy by setting createTable: true.
-  calendarTable: "CalendarEvents",
+  // Table name for this deployment. Include id so a second stack does not
+  // share another site's events. Do not use CalendarEvents — that is the live DLIV table.
+  calendarTable: "your-id-here-calendar",
 
-  // Set to true on first deploy if the table doesn't exist yet.
-  // Set back to false after first deploy — table will be imported from then on.
-  createTable: false,
+  // true only on the first deploy of a new table name. That deploy creates the table.
+  // After it succeeds, set this to false. Later deploys import the table and do not recreate it.
+  createTable: true,
 };

@@ -24,7 +24,8 @@ It is designed to work with `dliv-web` and other clients that read `calendar_out
 ```bash
 cd backend
 cp bin/config.example.ts bin/config.ts
-# edit bin/config.ts with id, awsRegion, userPoolId, calendarTable, createTable
+# edit bin/config.ts: id, awsRegion, userPoolId, calendarTable
+# createTable: true only on the first deploy of a new table name, then false
 
 npm install
 ./scripts/deploy.sh
@@ -46,8 +47,9 @@ From `backend/`:
 
 - `backend/bin/config.ts` is local-only (gitignored).
 - Use `config.example.ts` as the committed template.
-- `createTable: true` is for first deploy when the table does not exist.
-- After first deploy, set `createTable: false` to import/preserve the table.
+- `calendarTable` in the example is `your-id-here-calendar`. Use a name that includes your `id`. Do not use `CalendarEvents`. That is the live DLIV table, and a second stack with that name reads and writes DLIV events.
+- Set `createTable: true` only on the first deploy of a new table name. That deploy creates the table.
+- After that deploy succeeds, set `createTable: false`. Later deploys import the table and leave it in place.
 
 ## Security
 
