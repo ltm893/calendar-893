@@ -16,7 +16,7 @@ It is designed to work with `dliv-web` and other clients that read `calendar_out
 
 - AWS CLI configured (`aws sts get-caller-identity`)
 - Node.js 18+ (20 recommended)
-- AWS CDK bootstrapped in target account/region
+- AWS CDK bootstrapped once in that account and region. Steps: [Bootstrap CDK](https://github.com/ltm893/cognito-s3-stack-893#bootstrap-cdk)
 - Existing Cognito User Pool ID
 
 ## Quick start

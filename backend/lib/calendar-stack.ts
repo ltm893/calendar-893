@@ -7,6 +7,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as path from "path";
+import { resolveCalendarTable, resolveCreateTable } from "./baseId.cjs";
 
 export interface CalendarConfig {
   id:            string;
@@ -30,8 +31,8 @@ export class CalendarStack extends cdk.Stack {
     const { calendarClientId, calendarApiLogicalId } = props;
     const config = {
       ...props.config,
-      calendarTable: calendarTableName(props.config),
-      createTable: props.config.createTable ?? true,
+      calendarTable: resolveCalendarTable(props.config.id, props.config.calendarTable),
+      createTable: resolveCreateTable(props.config.createTable),
     };
 
     // ── Cognito — import existing User Pool ───────────────────────────────────
@@ -145,10 +146,4 @@ export class CalendarStack extends cdk.Stack {
     new cdk.CfnOutput(this, "CalendarAppClientId", { value: appClientId });
     new cdk.CfnOutput(this, "CalendarTableName",   { value: config.calendarTable });
   }
-}
-
-function calendarTableName(config: CalendarConfig): string {
-  const table = (config.calendarTable ?? "").trim();
-  if (!table || table === "your-id-here-calendar") return `${config.id}-calendar`;
-  return table;
 }
