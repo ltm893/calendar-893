@@ -35,13 +35,42 @@ if [ ! -f "$CONFIG_FILE" ]; then
 fi
 
 # ── Read config values ────────────────────────────────────────────────────────
-CONFIG_ID=$(grep -E '^\s+id:' "$CONFIG_FILE" | head -1 | sed 's/.*"\(.*\)".*/\1/')
-AWS_REGION=$(grep -E '^\s+awsRegion:' "$CONFIG_FILE" | head -1 | sed 's/.*"\(.*\)".*/\1/')
-USER_POOL_ID=$(grep -E '^\s+userPoolId:' "$CONFIG_FILE" | head -1 | sed 's/.*"\(.*\)".*/\1/')
-TABLE_NAME=$(grep -E '^\s+calendarTable:' "$CONFIG_FILE" | head -1 | sed 's/.*"\(.*\)".*/\1/')
+# id comes from cognito-s3-stack-893/base/bin/config.ts unless this config sets one.
+config_field() {
+  grep -E "^[[:space:]]+$2:" "$1" | head -1 | sed 's/.*"\([^"]*\)".*/\1/'
+}
+BASE_CONFIG="${BASE_CONFIG_PATH:-${REPO_ROOT}/../cognito-s3-stack-893/base/bin/config.ts}"
+LOCAL_ID=$(config_field "$CONFIG_FILE" id)
+if [ -n "$LOCAL_ID" ] && [ "$LOCAL_ID" != "your-id-here" ]; then
+  CONFIG_ID="$LOCAL_ID"
+  ID_FROM="this config.ts"
+else
+  if [ ! -f "$BASE_CONFIG" ]; then
+    echo "  ❌ id comes from cognito-s3-stack-893/base/bin/config.ts."
+    echo "     Not found at: $BASE_CONFIG"
+    echo "     Set BASE_CONFIG_PATH if that repo is not a sibling."
+    exit 1
+  fi
+  CONFIG_ID=$(config_field "$BASE_CONFIG" id)
+  ID_FROM="$BASE_CONFIG"
+fi
+AWS_REGION=$(config_field "$CONFIG_FILE" awsRegion)
+if [ -z "$AWS_REGION" ] && [ -f "$BASE_CONFIG" ]; then
+  AWS_REGION=$(config_field "$BASE_CONFIG" awsRegion)
+fi
+USER_POOL_ID=$(config_field "$CONFIG_FILE" userPoolId)
+TABLE_NAME=$(config_field "$CONFIG_FILE" calendarTable)
+if [ -z "$TABLE_NAME" ] || [ "$TABLE_NAME" = "your-id-here-calendar" ]; then
+  TABLE_NAME="${CONFIG_ID}-calendar"
+fi
+CREATE_TABLE=$(grep -E '^[[:space:]]+createTable:' "$CONFIG_FILE" | head -1 | sed 's/.*createTable:[[:space:]]*//; s/[^a-z].*//')
+if [ -z "$CREATE_TABLE" ]; then
+  CREATE_TABLE="true"
+fi
 
-if [ -z "$CONFIG_ID" ] || [ -z "$AWS_REGION" ] || [ -z "$USER_POOL_ID" ]; then
-  echo "  ❌ Could not read required values from config.ts."
+if [ -z "$CONFIG_ID" ] || [ "$CONFIG_ID" = "your-id-here" ] || [ -z "$AWS_REGION" ] || [ -z "$USER_POOL_ID" ]; then
+  echo "  ❌ Could not read id, region, and userPoolId."
+  echo "     id is set in the base config.ts. userPoolId stays in this config.ts."
   exit 1
 fi
 
@@ -51,9 +80,10 @@ API_NAME="${CONFIG_ID}-calendar-api"
 
 echo "  Stack:        $STACK_NAME"
 echo "  Region:       $AWS_REGION"
-echo "  ID prefix:    $CONFIG_ID"
+echo "  ID prefix:    $CONFIG_ID ($ID_FROM)"
 echo "  User Pool:    $USER_POOL_ID"
 echo "  DynamoDB:     $TABLE_NAME"
+echo "  createTable:  $CREATE_TABLE"
 echo ""
 
 # ── Check / create Cognito app client (idempotent) ────────────────────────────
@@ -126,7 +156,11 @@ if [ -n "$EXISTING_API_ID" ]; then
 else
   echo "    API Gateway:     will be created by CDK"
 fi
-echo "    DynamoDB:        $TABLE_NAME (imported only — never modified)"
+if [ "$CREATE_TABLE" = "true" ]; then
+  echo "    DynamoDB:        $TABLE_NAME (createTable true — creates the table on first deploy)"
+else
+  echo "    DynamoDB:        $TABLE_NAME (createTable false — imported, not recreated)"
+fi
 echo ""
 read -p "  Proceed? (y/n): " CONFIRM
 if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then echo "  Cancelled."; exit 0; fi

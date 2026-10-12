@@ -24,8 +24,10 @@ It is designed to work with `dliv-web` and other clients that read `calendar_out
 ```bash
 cd backend
 cp bin/config.example.ts bin/config.ts
-# edit bin/config.ts: id, awsRegion, userPoolId, calendarTable
-# createTable: true only on the first deploy of a new table name, then false
+# edit bin/config.ts: userPoolId
+# id comes from the sibling cognito-s3-stack-893/base/bin/config.ts
+# calendarTable defaults to {id}-calendar
+# createTable defaults to true; set it false after the first deploy
 
 npm install
 ./scripts/deploy.sh
@@ -47,9 +49,9 @@ From `backend/`:
 
 - `backend/bin/config.ts` is local-only (gitignored).
 - Use `config.example.ts` as the committed template.
-- `calendarTable` in the example is `your-id-here-calendar`. Use a name that includes your `id`. Do not use `CalendarEvents`. That is the live DLIV table, and a second stack with that name reads and writes DLIV events.
-- Set `createTable: true` only on the first deploy of a new table name. That deploy creates the table.
-- After that deploy succeeds, set `createTable: false`. Later deploys import the table and leave it in place.
+- `id` comes from the sibling `cognito-s3-stack-893/base/bin/config.ts` when this config omits it. An `id` already set in this config is kept, so an existing stack name does not change.
+- `calendarTable` defaults to `{id}-calendar`. Do not use `CalendarEvents`. That is the live DLIV table, and a second stack with that name reads and writes DLIV events.
+- `createTable` defaults to `true`. That first deploy creates the table. After it succeeds, set `createTable: false`. Later deploys import the table and leave it in place.
 
 ## Security
 

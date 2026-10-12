@@ -7,11 +7,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const config = {
-  // Short prefix for all AWS resource names.
-  // Lowercase letters, numbers, hyphens only.
-  id: "your-id-here",
+  // id is read from the sibling cognito-s3-stack-893/base/bin/config.ts.
+  // Set id here only to keep an already-deployed stack name.
 
-  // AWS region to deploy into.
+  // AWS region to deploy into. Omit to use the base config region.
   awsRegion: "us-east-1",
 
   // ── Auth ──────────────────────────────────────────────────────────────────
@@ -20,11 +19,9 @@ export const config = {
   userPoolId: "us-east-1_XXXXXXXXX",
 
   // ── DynamoDB ──────────────────────────────────────────────────────────────
-  // Table name for this deployment. Include id so a second stack does not
-  // share another site's events. Do not use CalendarEvents — that is the live DLIV table.
-  calendarTable: "your-id-here-calendar",
-
-  // true only on the first deploy of a new table name. That deploy creates the table.
-  // After it succeeds, set this to false. Later deploys import the table and do not recreate it.
-  createTable: true,
+  // Omit calendarTable to use "{id}-calendar".
+  // Do not set CalendarEvents. That is the live DLIV table.
+  //
+  // createTable defaults to true, which creates the table on first deploy.
+  // After that deploy succeeds, set createTable: false.
 };

@@ -3,7 +3,10 @@
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import { CalendarStack } from "../lib/calendar-stack";
-import { config } from "./config";
+import { withBaseId, withCalendarDefaults } from "./baseConfig";
+import { config as localConfig } from "./config";
+
+const config = withCalendarDefaults(withBaseId(localConfig));
 
 const app = new cdk.App();
 

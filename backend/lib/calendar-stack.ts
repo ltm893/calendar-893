@@ -12,8 +12,9 @@ export interface CalendarConfig {
   id:            string;
   awsRegion:     string;
   userPoolId:    string;
-  calendarTable: string;
-  createTable:   boolean;
+  calendarTable?: string;
+  /** Defaults to true. Set false after the first deploy of a table name. */
+  createTable?:  boolean;
 }
 
 export interface CalendarStackProps extends cdk.StackProps {
@@ -26,7 +27,12 @@ export class CalendarStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: CalendarStackProps) {
     super(scope, id, props);
 
-    const { config, calendarClientId, calendarApiLogicalId } = props;
+    const { calendarClientId, calendarApiLogicalId } = props;
+    const config = {
+      ...props.config,
+      calendarTable: calendarTableName(props.config),
+      createTable: props.config.createTable ?? true,
+    };
 
     // ── Cognito — import existing User Pool ───────────────────────────────────
     const userPool = cognito.UserPool.fromUserPoolId(
@@ -139,4 +145,10 @@ export class CalendarStack extends cdk.Stack {
     new cdk.CfnOutput(this, "CalendarAppClientId", { value: appClientId });
     new cdk.CfnOutput(this, "CalendarTableName",   { value: config.calendarTable });
   }
+}
+
+function calendarTableName(config: CalendarConfig): string {
+  const table = (config.calendarTable ?? "").trim();
+  if (!table || table === "your-id-here-calendar") return `${config.id}-calendar`;
+  return table;
 }
