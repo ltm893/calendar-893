@@ -35,6 +35,10 @@ npm install
 
 `deploy.sh` writes `calendar_outputs.json` at the repository root.
 
+## Tests
+
+`git push` runs `npm test` in `backend/` before the push, using Node 20. A new clone needs `bash scripts/install-git-hooks.sh` once. `SKIP_TESTS=1 git push` skips the check. GitHub runs the same tests on a pull request and does not require them to pass.
+
 ## Verify
 
 From `backend/`:
